@@ -1,6 +1,5 @@
-import jwt, { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { prisma } from "../db/db";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 export function genToken(id: number, username: string): string {
   return jwt.sign({ id, username }, process.env.SECRET!, {
@@ -27,28 +26,4 @@ export async function verifyHashedPassword(
     return true;
   }
   return false;
-}
-
-export async function saveToDB({
-  message,
-  toId,
-  fromId,
-}: {
-  message: string;
-  toId: number;
-  fromId: number;
-}) {
-  try {
-    await prisma.messages.create({
-      data: {
-        msg: message,
-        toId: Number(toId),
-        fromId: Number(fromId),
-      },
-    });
-    console.log("saved");
-    return true;
-  } catch (err) {
-    return false;
-  }
 }

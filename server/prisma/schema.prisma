@@ -14,17 +14,4 @@ model User {
   id        Int       @id @default(autoincrement())
   username  String
   password  String
-  sentMessages    Messages[] @relation("MessageFromUser")
-  receivedMessages Messages[] @relation("MessageToUser")
-}
-
-model Messages {
-  id        Int      @id @default(autoincrement())
-  msg       String
-  toId      Int
-  fromId    Int
-  createdAt DateTime @default(now())
-
-  fromUser  User     @relation("MessageFromUser", fields: [fromId], references: [id])
-  toUser    User     @relation("MessageToUser", fields: [toId], references: [id])
 }

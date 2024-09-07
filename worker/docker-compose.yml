@@ -1,0 +1,15 @@
+version: "3"
+services:
+  python:
+    image: python:3.9
+    volumes:
+      - ./code:/code
+    working_dir: /code
+    entrypoint: python
+
+  node:
+    image: node:21-alpine
+    volumes:
+      - ./code:/code
+    working_dir: /code
+    entrypoint: node

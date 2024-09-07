@@ -19,13 +19,13 @@ async function main() {
 
         const codeResponse = await executeCode(code, language);
 
-        console.log(codeResponse);
+        const status = codeResponse?.output || "something went wrong";
 
         const data = await redisClient.publish(
           "problem_done",
           JSON.stringify({
             problemId: problemId,
-            status: "TLE",
+            status: status,
             userId: userId,
           })
         );

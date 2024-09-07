@@ -1,52 +1,59 @@
-import fs from "fs";
 import Docker from "dockerode";
+import fs from "fs";
+import path from "path";
+
+const docker = new Docker();
 
 export async function executeCode(
   code: string,
-  language: "py" | "js" | "java"
+  language: "python" | "javascript"
 ) {
   try {
-    const images = {
-      py: "python:3.9",
-      js: "node:21-alpine",
-      java: "openjdk:11",
+    const services = {
+      python: "python:3.9",
+      javascript: "node:21-alpine",
     };
 
-    if (!images[language]) {
+    if (!services[language]) {
       return {
         message: "Failed, compiler not found",
       };
     }
-    const docker = new Docker();
 
-    const filename = `temp.${language}`;
+    const filename = path.join(
+      __dirname,
+      `temp.${language === "python" ? "py" : "js"}`
+    );
     fs.writeFileSync(filename, code);
 
     const container = await docker.createContainer({
-      Image: images[language],
-      Cmd: [language === "py" ? "python" : "node", filename], // Adjust command based on language
+      Image: services[language],
+      Cmd: [
+        language === "python" ? "python" : "node",
+        `/code/${path.basename(filename)}`,
+      ],
       AttachStdout: true,
       AttachStderr: true,
-      Tty: false,
+      HostConfig: {
+        Binds: [`${path.dirname(filename)}:/code`], // Mount the directory
+      },
     });
 
     await container.start();
+
     const stream = await container.attach({
       stream: true,
       stdout: true,
       stderr: true,
     });
-
     let output = "";
-    stream.on("data", (chunk) => {
-      output += chunk.toString();
-    });
+    stream.on("data", (chunk) => (output += chunk.toString()));
 
     await container.wait();
+
     await container.remove();
 
-    // fs.unlinkSync(filename);
-
+    fs.unlinkSync(filename);
     return { output };
   } catch (err) {
     console.error(err);

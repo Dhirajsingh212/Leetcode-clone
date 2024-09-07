@@ -14,11 +14,14 @@
     "@types/dockerode": "^3.3.31",
     "@types/dotenv": "^8.2.0",
     "@types/nodemon": "^1.19.6",
+    "@types/rimraf": "^3.0.2",
+    "docker-compose": "^0.24.8",
     "dockerode": "^4.0.2",
     "dotenv": "^16.4.5",
     "ioredis": "^5.4.1",
     "nodemon": "^3.1.4",
     "redis": "^4.7.0",
+    "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
   }

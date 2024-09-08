@@ -2,10 +2,16 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import http, { IncomingMessage } from "http";
 import morgan from "morgan";
+import { createClient } from "redis";
+import { WebSocket, WebSocketServer } from "ws";
 import authRoutes from "./routes/auth";
-import { redisClient } from "./utils/redis";
 import codeRoutes from "./routes/code";
+
+const redisClient = createClient({
+  url: process.env.REDIS_URL || "",
+});
 
 const app = express();
 
@@ -28,14 +34,41 @@ app.get("/", (req, res) => {
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/code", codeRoutes);
 
-async function startServer() {
-  try {
-    redisClient.on("connect", () => {
-      console.log("redis connected successfully");
+const server = http.createServer(app);
+const wss = new WebSocketServer({ noServer: true });
+
+wss.on(
+  "connection",
+  function connection(ws: WebSocket, request: IncomingMessage) {
+    ws.on("error", console.error);
+
+    redisClient.subscribe("problem_done", (message) => {
+      console.log("THIS IS MESSAGE: " + message);
+
+      wss.clients.forEach((client: WebSocket) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({ message }));
+        }
+      });
     });
 
-    app.listen(8000, () => {
-      console.log("server is running on port 8000");
+    ws.send("connected through websocket");
+  }
+);
+
+server.on("upgrade", (request: IncomingMessage, socket: any, head: Buffer) => {
+  wss.handleUpgrade(request, socket, head, (ws: WebSocket) => {
+    wss.emit("connection", ws, request);
+  });
+});
+
+async function startServer() {
+  try {
+    redisClient.connect();
+    console.log("redis connected.");
+
+    server.listen(8000, function () {
+      console.log(`Listening on 8000`);
     });
   } catch (err) {
     console.log("Failed to start server");

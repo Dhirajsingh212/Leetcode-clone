@@ -1,17 +1,15 @@
 FROM node:21-alpine
 
-WORKDIR /pubsub
+WORKDIR /client
 
 COPY package*.json ./
 
 RUN npm install
 
-COPY . . 
+COPY . .
 
 RUN npm run build
 
-EXPOSE 8080
-
-RUN node -v
+EXPOSE 3000
 
 CMD ["npm", "run","dev"]

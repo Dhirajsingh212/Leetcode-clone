@@ -39,18 +39,6 @@ services:
     volumes:
       - ./server:/server
 
-  pubsub:
-    build: ./pubsub
-    container_name: pubsub
-    ports:
-      - "8080:8080"
-    environment:
-      - REDIS_URL=redis://redis:6379
-    depends_on:
-      - redis
-    volumes:
-      - ./pubsub:/pubsub
-
   worker:
     build: ./worker
     container_name: worker
@@ -62,6 +50,16 @@ services:
       - redis
     volumes:
       - ./worker:/worker
+
+  client:
+    build: ./client
+    container_name: client
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
+    volumes:
+      - ./client:/client
 
 volumes:
   db:

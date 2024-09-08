@@ -1,15 +1,17 @@
 "use client";
+import { userState } from "@/atoms";
+import Spinner from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { setItem } from "@/lib/storage";
 import axios from "axios";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useSetRecoilState } from "recoil";
 import { toast } from "sonner";
 import { BASE_URL } from "../config";
-import Spinner from "@/components/Spinner";
-import { useSetRecoilState } from "recoil";
-import { userState } from "@/atoms";
 
 interface SignUp {
   username: string;
@@ -26,6 +28,8 @@ const Page = () => {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const router = useRouter();
+
   const submitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
@@ -34,12 +38,18 @@ const Page = () => {
         toast.warning("Fields cannot be empty.");
         return;
       }
-      await axios.post(`${BASE_URL}auth/signup`, {
+      const response = await axios.post(`${BASE_URL}auth/signup`, {
         username: formData.username,
         password: formData.password,
       });
-      toast.success("LoggedIn.");
-      setUserState(true);
+      setItem("user", {
+        userId: response.data.id,
+      });
+      setUserState({
+        userId: response.data.id,
+      });
+      toast.success("Signed up.");
+      router.push("/");
     } catch (err) {
       console.log(err);
       toast.error("something went wrong.");
@@ -101,7 +111,7 @@ const Page = () => {
               </Button>
             </form>
             <div className="text-center text-sm">
-              Already have an account?{" "}
+              Already have an account?
               <Link
                 href="/signin"
                 className="text-primary hover:underline"

@@ -9,7 +9,7 @@ const Header = () => {
     <header className="bg-primary dark:bg-slate-700 dark:text-white text-primary-foreground px-4 py-8 lg:px-6 h-14 flex items-center justify-between">
       <Link href="/" className="flex items-center" prefetch={false}>
         <CodeIcon className="h-6 w-6" />
-        <span className="ml-2 font-bold text-lg">Coding Platform</span>
+        <span className="ml-2 font-bold text-lg">CodePal</span>
       </Link>
       <nav className="flex items-center gap-4 sm:gap-6">
         <Link

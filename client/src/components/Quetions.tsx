@@ -1,8 +1,6 @@
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { StarIcon } from "@/icons";
-import Link from "next/link";
-import SortByMenu from "./SortByMenu";
+import { problemsData } from "@/data";
 import QuestionCard from "./QuestionCard";
+import SortByMenu from "./SortByMenu";
 
 const Quetions = () => {
   return (
@@ -11,9 +9,19 @@ const Quetions = () => {
         <h1 className="text-2xl font-bold">Coding Problems</h1>
         <SortByMenu />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {Array.from({ length: 100 }).map((element: any, index: number) => {
-          return <QuestionCard key={index} />;
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {problemsData.map((element: any, index: number) => {
+          return (
+            <QuestionCard
+              id={element.id}
+              tag={element.tag}
+              title={element.title}
+              description={element.description}
+              examples={element.examples}
+              constraints={element.constraints}
+              key={index}
+            />
+          );
         })}
       </div>
     </div>

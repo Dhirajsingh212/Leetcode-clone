@@ -36,6 +36,7 @@ services:
       - NODE_ENV=development
       - PORT=8000
       - REDIS_URL=redis://redis:6379
+      - ORIGIN="http://localhost:3000"
     volumes:
       - ./server:/server
 

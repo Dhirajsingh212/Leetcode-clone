@@ -38,10 +38,14 @@ export default function Page() {
         toast.warning("Fields cannot be empty.");
         return;
       }
-      const response = await axios.post(`${BASE_URL}auth/login`, {
-        username: formData.username,
-        password: formData.password,
-      });
+      const response = await axios.post(
+        `${BASE_URL}auth/login`,
+        {
+          username: formData.username,
+          password: formData.password,
+        },
+        { withCredentials: true }
+      );
       setItem("user", {
         userId: response.data.id,
       });

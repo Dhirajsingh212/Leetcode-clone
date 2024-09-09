@@ -1,5 +1,4 @@
 "use client";
-import React, { useRef, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -7,15 +6,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useRef, useState } from "react";
 
+import { BASE_URL } from "@/app/config";
+import { userState } from "@/atoms";
 import Editor from "@monaco-editor/react";
+import axios from "axios";
+import { useRecoilValue } from "recoil";
+import { toast } from "sonner";
 import Spinner from "./Spinner";
 import { Button } from "./ui/button";
-import { useRecoilValue } from "recoil";
-import { userState } from "@/atoms";
-import axios from "axios";
-import { BASE_URL } from "@/app/config";
-import { toast } from "sonner";
 
 export function EditorComp({
   isLoading,
@@ -37,12 +37,16 @@ export function EditorComp({
     setIsLoading(true);
     const code = (editorRef?.current as any).getValue();
     try {
-      const data = await axios.post(`${BASE_URL}code/submit`, {
-        problemId: 1,
-        userId: userStateValue.userId,
-        code: code,
-        language: language,
-      });
+      const data = await axios.post(
+        `${BASE_URL}code/submit`,
+        {
+          problemId: 1,
+          userId: userStateValue.userId,
+          code: code,
+          language: language,
+        },
+        { withCredentials: true }
+      );
       toast.success(data.data.message);
     } catch (err) {
       console.log(err);
@@ -57,6 +61,7 @@ export function EditorComp({
             onValueChange={(e) => {
               setLanguage(e);
             }}
+            defaultValue={language}
           >
             <SelectTrigger className="w-[180px] text-white">
               <SelectValue placeholder="Select language" />
@@ -71,6 +76,7 @@ export function EditorComp({
             onValueChange={(e) => {
               setTheme(e);
             }}
+            defaultValue={theme}
           >
             <SelectTrigger className="w-[180px] text-white">
               <SelectValue placeholder="Select theme" />

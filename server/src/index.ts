@@ -8,6 +8,7 @@ import { createClient } from "redis";
 import { WebSocket, WebSocketServer } from "ws";
 import authRoutes from "./routes/auth";
 import codeRoutes from "./routes/code";
+import { verifyToken } from "./utils";
 
 const redisClient = createClient({
   url: process.env.REDIS_URL || "",
@@ -19,7 +20,7 @@ dotenv.config();
 
 app.use(
   cors({
-    origin: process.env.ORIGIN,
+    origin: "http://localhost:3000",
     credentials: true,
   })
 );
@@ -37,20 +38,50 @@ app.use("/api/v1/code", codeRoutes);
 const server = http.createServer(app);
 const wss = new WebSocketServer({ noServer: true });
 
+interface Client {
+  ws: any;
+  id: number;
+}
+
+let clientsMap = new Map<number, Client>();
+
+function addClient(client: Client) {
+  clientsMap.set(client.id, client);
+}
+
 wss.on(
   "connection",
   function connection(ws: WebSocket, request: IncomingMessage) {
     ws.on("error", console.error);
 
-    redisClient.subscribe("problem_done", (message) => {
-      console.log("THIS IS MESSAGE: " + message);
+    const token = (request.headers as any).cookie;
+    const regex = /access_token=([^;]+)/;
 
-      wss.clients.forEach((client: WebSocket) => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({ message }));
-        }
+    const match = token.match(regex);
+    const accessToken = match ? match[1] : null;
+
+    if (!accessToken) {
+      ws.close();
+    }
+
+    try {
+      const decoded = verifyToken(accessToken);
+      addClient({ ws, id: (decoded as any).id });
+
+      redisClient.subscribe("problem_done", (message: any) => {
+        clientsMap.forEach((client) => {
+          const parsedMessage = JSON.parse(message || "");
+          if (
+            Number(parsedMessage.userId) === Number(client.id) &&
+            client.ws.readyState === WebSocket.OPEN
+          ) {
+            client.ws.send(JSON.stringify({ message }));
+          }
+        });
       });
-    });
+    } catch (err) {
+      console.log(err);
+    }
 
     ws.send("connected through websocket");
   }

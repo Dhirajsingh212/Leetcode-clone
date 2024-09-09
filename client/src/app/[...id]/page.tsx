@@ -1,15 +1,15 @@
 "use client";
 
+import AuthCheck from "@/components/AuthCheck";
 import { EditorComp } from "@/components/Editor";
 import Header from "@/components/Header";
-import { problemsData } from "@/data";
-import { useParams } from "next/navigation";
-import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
-import AuthCheck from "@/components/AuthCheck";
 import OutputWindow from "@/components/OutputWindow";
+import Spinner from "@/components/Spinner";
+import { problemsData } from "@/data";
+import { cn } from "@/lib/utils";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useRecoilValue } from "recoil";
-import { userState } from "@/atoms";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { toast } from "sonner";
 
 export default function Component() {
@@ -18,18 +18,6 @@ export default function Component() {
   const problemById = problemsData.filter((element: any) => {
     return element.id == id[0];
   })[0];
-
-  const color = (tag: string) => {
-    if (tag === "Easy") {
-      return "green-500";
-    } else if (tag === "Medium") {
-      return "yellow-500";
-    }
-    return "rose-600";
-  };
-
-  const tagColor = color(problemById.tag);
-  const userStateValue = useRecoilValue(userState);
 
   const [socket, setSocket] = useState<WebSocket | null>();
   const [message, setMessage] = useState<string>("");
@@ -47,12 +35,25 @@ export default function Component() {
       setMessage(message.data);
       setIsLoading(false);
     };
+
+    newSocket.onclose = (event) => {
+      toast.error("Disconnected please reload the page.");
+    };
+
     return () => {
       if (socket) {
         socket.close();
       }
     };
   }, []);
+
+  if (!socket) {
+    return (
+      <div className="flex flex-row items-center justify-center h-screen w-screen">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <AuthCheck>
@@ -74,7 +75,17 @@ export default function Component() {
                       {problemById.description}
                     </p>
                     <p
-                      className={`border px-3 py-1 inline-block text-${tagColor} w-fit text-center text-sm md:text-base rounded-lg border-${tagColor} my-4`}
+                      className={cn(
+                        `border px-3 py-1 inline-block  w-fit text-center text-sm md:text-base rounded-lg  my-4`,
+                        {
+                          "text-green-500 border-green-500":
+                            problemById.tag === "Easy",
+                          "text-yellow-500 border-yellow-500":
+                            problemById.tag === "Medium",
+                          "text-rose-500 border-rose-500":
+                            problemById.tag === "Hard",
+                        }
+                      )}
                     >
                       {problemById.tag}
                     </p>
@@ -113,7 +124,7 @@ export default function Component() {
               </div>
             </Panel>
 
-            <PanelResizeHandle className="border" />
+            <PanelResizeHandle className="border hover:border-blue-700" />
 
             <Panel
               defaultSize={60}
@@ -121,17 +132,16 @@ export default function Component() {
               className="min-w-0 overflow-hidden"
             >
               <PanelGroup direction="vertical" className="gap-4">
-                <Panel defaultSize={20} minSize={20}>
-                  <OutputWindow message={message} />
-                </Panel>
-
-                <PanelResizeHandle className="border" />
-
                 <Panel defaultSize={60} minSize={20}>
                   <EditorComp
                     isLoading={isLoading}
                     setIsLoading={setIsLoading}
                   />
+                </Panel>
+
+                <PanelResizeHandle className="border hover:border-blue-700" />
+                <Panel defaultSize={20} minSize={20}>
+                  <OutputWindow message={message} isLoading={isLoading} />
                 </Panel>
               </PanelGroup>
             </Panel>

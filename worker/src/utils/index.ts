@@ -10,14 +10,12 @@ export async function executeCode(
 ) {
   try {
     const services = {
-      python: "python:3.9",
+      python: "python:3.8.19-alpine3.20",
       javascript: "node:21-alpine",
     };
 
     if (!services[language]) {
-      return {
-        message: "Failed, compiler not found",
-      };
+      return { msg: "Failed, compiler not found" };
     }
 
     const filename = path.join(
@@ -35,7 +33,7 @@ export async function executeCode(
       AttachStdout: true,
       AttachStderr: true,
       HostConfig: {
-        Binds: [`${path.dirname(filename)}:/code`], // Mount the directory
+        Binds: [`${path.dirname(filename)}:/code`],
       },
     });
 
@@ -46,16 +44,20 @@ export async function executeCode(
       stdout: true,
       stderr: true,
     });
+
     let output = "";
-    stream.on("data", (chunk) => (output += chunk.toString()));
+    stream.on("data", (chunk) => {
+      output += chunk.toString().replace(/[^\x20-\x7E\n]/g, "");
+    });
 
     await container.wait();
-
     await container.remove();
 
     fs.unlinkSync(filename);
-    return { output };
+
+    return { output: output.trim() };
   } catch (err) {
     console.error(err);
+    return { msg: "Error occurred during execution" };
   }
 }

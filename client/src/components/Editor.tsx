@@ -17,7 +17,13 @@ import axios from "axios";
 import { BASE_URL } from "@/app/config";
 import { toast } from "sonner";
 
-export function EditorComp() {
+export function EditorComp({
+  isLoading,
+  setIsLoading,
+}: {
+  isLoading: boolean;
+  setIsLoading: (e: boolean) => void;
+}) {
   const editorRef = useRef(null);
   const [language, setLanguage] = useState<string>("javascript");
   const [theme, setTheme] = useState<string>("vs-dark");
@@ -28,7 +34,7 @@ export function EditorComp() {
   }
 
   async function showValue() {
-    console.log((editorRef?.current as any).getValue());
+    setIsLoading(true);
     const code = (editorRef?.current as any).getValue();
     try {
       const data = await axios.post(`${BASE_URL}code/submit`, {
@@ -75,7 +81,9 @@ export function EditorComp() {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={showValue}>Run</Button>
+        <Button disabled={isLoading} onClick={showValue}>
+          {isLoading ? <Spinner /> : "Run"}
+        </Button>
       </div>
       <Editor
         theme={theme}

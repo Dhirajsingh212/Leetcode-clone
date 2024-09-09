@@ -6,6 +6,11 @@ import { problemsData } from "@/data";
 import { useParams } from "next/navigation";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import AuthCheck from "@/components/AuthCheck";
+import OutputWindow from "@/components/OutputWindow";
+import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
+import { userState } from "@/atoms";
+import { toast } from "sonner";
 
 export default function Component() {
   const { id } = useParams();
@@ -24,6 +29,30 @@ export default function Component() {
   };
 
   const tagColor = color(problemById.tag);
+  const userStateValue = useRecoilValue(userState);
+
+  const [socket, setSocket] = useState<WebSocket | null>();
+  const [message, setMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const newSocket = new WebSocket("ws://localhost:8000");
+
+    newSocket.onopen = () => {
+      toast.success("Connection established.");
+      setSocket(newSocket);
+    };
+
+    newSocket.onmessage = (message) => {
+      setMessage(message.data);
+      setIsLoading(false);
+    };
+    return () => {
+      if (socket) {
+        socket.close();
+      }
+    };
+  }, []);
 
   return (
     <AuthCheck>
@@ -84,14 +113,27 @@ export default function Component() {
               </div>
             </Panel>
 
-            <PanelResizeHandle className="w-2 bg-gray-300 cursor-col-resize" />
+            <PanelResizeHandle className="border" />
 
             <Panel
               defaultSize={60}
               minSize={20}
               className="min-w-0 overflow-hidden"
             >
-              <EditorComp />
+              <PanelGroup direction="vertical" className="gap-4">
+                <Panel defaultSize={20} minSize={20}>
+                  <OutputWindow message={message} />
+                </Panel>
+
+                <PanelResizeHandle className="border" />
+
+                <Panel defaultSize={60} minSize={20}>
+                  <EditorComp
+                    isLoading={isLoading}
+                    setIsLoading={setIsLoading}
+                  />
+                </Panel>
+              </PanelGroup>
             </Panel>
           </PanelGroup>
         </div>

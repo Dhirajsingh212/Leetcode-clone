@@ -33,7 +33,7 @@ const QuestionCard = ({
           </div>
           <StarIcon className="w-4 h-4 text-yellow-500" />
         </div>
-        <h3 className="text-lg font-bold mb-2">{title}</h3>
+        <h3 className="text-lg font-bold mb-2 text-white">{title}</h3>
         <p className="text-sm text-muted-foreground line-clamp-3">
           {description}
         </p>

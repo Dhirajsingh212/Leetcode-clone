@@ -15,6 +15,7 @@
     "@types/dotenv": "^8.2.0",
     "@types/nodemon": "^1.19.6",
     "@types/rimraf": "^4.0.5",
+    "@types/uuid": "^10.0.0",
     "docker-compose": "^0.24.8",
     "dockerode": "^4.0.2",
     "dotenv": "^16.4.5",
@@ -23,6 +24,7 @@
     "redis": "^4.7.0",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "uuid": "^10.0.0"
   }
 }

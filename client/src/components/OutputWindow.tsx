@@ -14,7 +14,7 @@ const OutputWindow = ({
   try {
     parsedMessage = JSON.parse(message || "{}");
     parsedMessage2 = JSON.parse(parsedMessage.message || "{}");
-    cleanStatus = parsedMessage2.status?.replace(/[^\x20-\x7E\n]/g, "").trim();
+    cleanStatus = parsedMessage2.status;
   } catch (error) {
     parsedMessage2 = { status: "" };
   }
@@ -26,7 +26,7 @@ const OutputWindow = ({
           <Spinner />
         </div>
       ) : parsedMessage2.status ? (
-        cleanStatus
+        <div className="whitespace-pre-wrap">{cleanStatus}</div>
       ) : (
         "Press run button to get output."
       )}

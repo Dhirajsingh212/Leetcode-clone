@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { executeCode } from "./utils";
+import { handleCode } from "./utils/code";
 import { redisClient } from "./utils/redis";
 
 async function main() {
@@ -17,9 +17,9 @@ async function main() {
       if (parsedResponseData) {
         const { problemId, userId, code, language } = parsedResponseData;
 
-        const codeResponse = await executeCode(code, language);
+        const codeResponse = await handleCode(code, language);
 
-        const status = codeResponse?.output || "something went wrong";
+        const status = codeResponse.output || "something went wrong";
 
         const data = await redisClient.publish(
           "problem_done",

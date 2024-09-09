@@ -46,14 +46,18 @@ export async function executeCode(
     });
 
     let output = "";
-    stream.on("data", (chunk) => {
-      output += chunk.toString().replace(/[^\x20-\x7E\n]/g, "");
+    stream.on("data", async (chunk) => {
+      const chunkStr = await chunk.toString("utf-8");
+      const cleanedChunk = chunkStr.replace(/[^\x20-\x7E\n]/g, "");
+      output += cleanedChunk.trim();
     });
 
     await container.wait();
     await container.remove();
 
     fs.unlinkSync(filename);
+
+    console.log(output);
 
     return { output: output.trim() };
   } catch (err) {

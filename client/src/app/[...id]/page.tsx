@@ -92,6 +92,14 @@ export default function Component() {
                   </div>
                   <div className="space-y-4">
                     <h2 className="text-lg md:text-xl font-semibold">
+                      Explanation
+                    </h2>
+                    <p className="pr-2 whitespace-pre overflow-x-scroll bg-gray-200 rounded-lg no-scrollbar">
+                      {problemById.explanation}
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    <h2 className="text-lg md:text-xl font-semibold">
                       Example
                     </h2>
                     {problemById.examples.map((element: any, index: number) => (
@@ -99,7 +107,7 @@ export default function Component() {
                         className="bg-muted rounded-md p-4 text-sm md:text-base"
                         key={index}
                       >
-                        <p className="text-muted-foreground">
+                        <p className="text-muted-foreground whitespace-pre">
                           Input: {element.input}
                           <br />
                           Output: {element.output}
@@ -136,6 +144,7 @@ export default function Component() {
                   <EditorComp
                     isLoading={isLoading}
                     setIsLoading={setIsLoading}
+                    testCases={problemById.examples[0]}
                   />
                 </Panel>
 

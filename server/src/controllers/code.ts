@@ -2,7 +2,7 @@ import { redisClient } from "../utils/redis";
 
 export async function SubmitFunction(req: any, res: any) {
   try {
-    const { problemId, userId, code, language } = req.body;
+    const { problemId, userId, code, language, testcase } = req.body;
 
     await redisClient.lpush(
       "problems",
@@ -11,6 +11,7 @@ export async function SubmitFunction(req: any, res: any) {
         userId,
         code,
         language,
+        testcase,
       })
     );
     return res.status(200).json({

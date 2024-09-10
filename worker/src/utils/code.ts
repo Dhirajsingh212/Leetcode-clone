@@ -29,9 +29,15 @@ function getRunCommand(language: string) {
   }
 }
 
+interface TestCase {
+  input: string;
+  output: string;
+}
+
 export const handleCode = async (
   userCode: string,
-  language: string
+  language: string,
+  testcase: TestCase
 ): Promise<ExecutionResult> => {
   const extension = getExtension(language);
   const image = getImage(language);

@@ -17,12 +17,19 @@ import { toast } from "sonner";
 import Spinner from "./Spinner";
 import { Button } from "./ui/button";
 
+interface TestCase {
+  input: string;
+  output: string;
+}
+
 export function EditorComp({
   isLoading,
   setIsLoading,
+  testCases,
 }: {
   isLoading: boolean;
   setIsLoading: (e: boolean) => void;
+  testCases: TestCase;
 }) {
   const editorRef = useRef(null);
   const [language, setLanguage] = useState<string>("javascript");
@@ -44,6 +51,7 @@ export function EditorComp({
           userId: userStateValue.userId,
           code: code,
           language: language,
+          testcase: testCases,
         },
         { withCredentials: true }
       );

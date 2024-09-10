@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import { handleCode } from "./utils/code";
 import { redisClient } from "./utils/redis";
+import { cleanProblemData } from "./utils/functions";
 
 async function main() {
   dotenv.config();
@@ -15,9 +16,12 @@ async function main() {
       const parsedResponseData = JSON.parse(response?.[1] || "");
 
       if (parsedResponseData) {
-        const { problemId, userId, code, language } = parsedResponseData;
+        const { problemId, userId, code, language, testcase } =
+          parsedResponseData;
 
-        const codeResponse = await handleCode(code, language);
+        const cleanedTestCase = cleanProblemData(testcase);
+        // console.log(cleanedTestCase);
+        const codeResponse = await handleCode(code, language, testcase);
 
         const status = codeResponse.output || "something went wrong";
 

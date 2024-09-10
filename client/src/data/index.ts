@@ -9,7 +9,7 @@ export const problemsData = [
       {
         input: `
           5
-          5 9
+          4 9
           2 7 11 15
           3 6
           3 2 4
@@ -20,11 +20,11 @@ export const problemsData = [
           4 0
           0 4 3 0`,
         output: `
-          0 1
-          1 2
-          0 1
-          2 4
-          0 3
+          [0, 1]
+          [1, 2]
+          [0, 1]
+          [2, 4]
+          [0, 3]
         `,
       },
     ],
@@ -150,18 +150,54 @@ export const problemsData = [
     examples: [
       {
         input: `
+        5
+        abcabcbb
+        bbbbb
+        pwwkew
+        dvdf`,
+        output: `
+        3
+        1
+        3
+        3
+        `,
+      },
+    ],
+    explanation: `
+    Input:
+    The first line contains an integer t (the number of test cases).
+    Each test case consists of a single string s.
+    
+    Output:
+    For each test case, output an integer representing the length of the longest substring without repeating characters.
+    
+    Example:
+    Test case 1: For the string "abcabcbb", the longest substring without repeating characters is "abc", which has a length of 3.
+    Test case 2: For the string "bbbbb", the longest substring is "b", with a length of 1.
+    `,
+    constraints: [
+      "0 <= s.length <= 5 * 10^4",
+      "s consists of English letters, digits, symbols, and spaces.",
+    ],
+  },
+  {
+    id: 5,
+    tag: "Medium",
+    title: "Find Sum",
+    description: "Given two numbers find the sum of two numbers.",
+    examples: [
+      {
+        input: `
           5
-          abcabcbb
-          bbbbb
-          pwwkew
-          ""
-          dvdf`,
+          1 2
+          3 5
+          6 7
+          2 5`,
         output: `
           3
-          1
-          3
-          0
-          3
+          8
+          13
+          7
         `,
       },
     ],

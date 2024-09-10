@@ -20,16 +20,18 @@ async function main() {
           parsedResponseData;
 
         const cleanedTestCase = cleanProblemData(testcase);
-        // console.log(cleanedTestCase);
-        const codeResponse = await handleCode(code, language, testcase);
 
-        const status = codeResponse.output || "something went wrong";
+        const codeResponse = await handleCode(code, language, cleanedTestCase);
+
+        const status = codeResponse.output || "Test cases failed";
 
         const data = await redisClient.publish(
           "problem_done",
           JSON.stringify({
             problemId: problemId,
             status: status,
+            success: codeResponse.success,
+            error: codeResponse.error,
             userId: userId,
           })
         );

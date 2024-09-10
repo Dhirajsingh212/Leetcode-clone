@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import Spinner from "./Spinner";
 
 const OutputWindow = ({
@@ -26,7 +27,14 @@ const OutputWindow = ({
           <Spinner />
         </div>
       ) : parsedMessage2.status ? (
-        <div className="whitespace-pre-wrap">{cleanStatus}</div>
+        <div
+          className={cn(`whitespace-pre-wrap`, {
+            "text-rose-500": parsedMessage2.error,
+            "text-green-600": parsedMessage2.success,
+          })}
+        >
+          {cleanStatus}
+        </div>
       ) : (
         "Press run button to get output."
       )}

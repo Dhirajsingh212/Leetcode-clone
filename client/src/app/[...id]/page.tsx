@@ -94,7 +94,7 @@ export default function Component() {
                     <h2 className="text-lg md:text-xl font-semibold">
                       Explanation
                     </h2>
-                    <p className="pr-2 whitespace-pre overflow-x-scroll bg-gray-200 rounded-lg no-scrollbar">
+                    <p className="pr-2 text-gray-600 dark:text-gray-300 whitespace-pre overflow-x-scroll bg-gray-200 dark:bg-slate-800 rounded-lg no-scrollbar">
                       {problemById.explanation}
                     </p>
                   </div>

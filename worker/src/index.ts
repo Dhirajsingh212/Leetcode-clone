@@ -3,13 +3,12 @@ import { handleCode, handleJavaCode } from "./utils/code";
 import { redisClient } from "./utils/redis";
 import { cleanProblemData } from "./utils/functions";
 
-// Define the types for your response data and code response
 interface ProblemData {
   problemId: string;
   userId: string;
   code: string;
   language: string;
-  testcase: any; // Adjust type as needed
+  testcase: any;
 }
 
 interface CodeResponse {
@@ -27,7 +26,6 @@ async function main() {
 
   while (true) {
     try {
-      // GET DATA FROM THE QUEUE
       const response = await redisClient.brpop("problems", 0);
       const parsedResponseData: ProblemData | null = response
         ? JSON.parse(response[1] || "")

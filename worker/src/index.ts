@@ -37,6 +37,8 @@ async function main() {
         const { problemId, userId, code, language, testcase } =
           parsedResponseData;
 
+        console.log(`Code submitted by ${userId}`);
+
         const cleanedTestCase = cleanProblemData(testcase);
         let codeResponse: CodeResponse;
 

@@ -146,8 +146,6 @@ export const handleJavaCode = async (
     };
   }
 
-  console.log("Compilation successful");
-
   const result = await runJavaCode(testCases);
 
   fs.unlinkSync(filePath);

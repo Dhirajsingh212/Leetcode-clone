@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import fs from "fs";
 import readline from "readline";
+import path from "path";
 
 interface ExecutionResult {
   output: string;
@@ -117,6 +118,136 @@ export const handleCode = async (
         });
       }
       resolve({ output: outputValue, success: false, error: false });
+    });
+  });
+};
+
+export const handleJavaCode = async (
+  code: string,
+  testCases: TestCase
+): Promise<ExecutionResult> => {
+  const fileName = "Main.java";
+  const filePath = path.join(__dirname, fileName);
+  const compiledFilePath = path.join(__dirname, "Main.class");
+
+  fs.writeFileSync(filePath, code, "utf-8");
+
+  const compileCommand = `docker run --rm -v "${__dirname}:/code" openjdk:21 javac /code/${fileName}`;
+
+  const compileResult = await runCommand(compileCommand);
+
+  if (compileResult.error) {
+    fs.unlinkSync(filePath);
+
+    return {
+      output: `Compilation error: ${compileResult.output}`,
+      error: true,
+      success: false,
+    };
+  }
+
+  console.log("Compilation successful");
+
+  const result = await runJavaCode(testCases);
+
+  fs.unlinkSync(filePath);
+  fs.unlinkSync(compiledFilePath);
+
+  return result;
+};
+
+const runCommand = (
+  command: string
+): Promise<{ output: string; error: boolean }> => {
+  return new Promise((resolve) => {
+    const process = spawn(command, { shell: true });
+
+    let output = "";
+    let errorOutput = "";
+
+    process.stdout.on("data", (data) => {
+      output += data.toString();
+    });
+
+    process.stderr.on("data", (data) => {
+      errorOutput += data.toString();
+    });
+
+    process.on("close", (code) => {
+      resolve({
+        output: errorOutput,
+        error: code !== 0,
+      });
+    });
+  });
+};
+
+const runJavaCode = (testCases: TestCase): Promise<ExecutionResult> => {
+  return new Promise((resolve) => {
+    const inputFilePath = path.join(__dirname, "input.txt");
+    const expectedOutput = testCases.output
+      .replace("\r", "")
+      .replace(/\s/g, "\n");
+
+    fs.writeFileSync(
+      inputFilePath,
+      testCases.input.replace("\r", "").replace(/\s/g, "\n"),
+      "utf-8"
+    );
+
+    const dockerCommand = [
+      "run",
+      "--rm",
+      "-i",
+      "-v",
+      `${__dirname}:/code`,
+      "openjdk:21",
+      "java",
+      "-cp",
+      "/code",
+      "Main",
+    ];
+
+    const dockerContainer = spawn("docker", dockerCommand, {
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+
+    const inputStream = fs.createReadStream(inputFilePath);
+    inputStream.pipe(dockerContainer.stdin);
+
+    let outputValue = "";
+    let error: string | null = null;
+
+    dockerContainer.stdout.on("data", (data) => {
+      outputValue += data.toString();
+    });
+
+    dockerContainer.stderr.on("data", (stderr) => {
+      console.error(`Docker container stderr: ${stderr}`);
+      error = stderr.toString();
+    });
+
+    dockerContainer.on("close", (code) => {
+      fs.unlinkSync(inputFilePath);
+      if (error) {
+        resolve({
+          output: error,
+          success: false,
+          error: true,
+        });
+      } else if (expectedOutput.trim() === outputValue.trim()) {
+        resolve({
+          output: "All test cases passed",
+          success: true,
+          error: false,
+        });
+      } else {
+        resolve({
+          output: outputValue,
+          success: false,
+          error: false,
+        });
+      }
     });
   });
 };

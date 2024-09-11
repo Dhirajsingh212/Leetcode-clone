@@ -108,9 +108,14 @@ export default function Component() {
                         key={index}
                       >
                         <p className="text-muted-foreground whitespace-pre">
-                          Input: {element.input}
+                          Input:
                           <br />
-                          Output: {element.output}
+                          {element.input}
+                          <br />
+                          <br />
+                          Output:
+                          <br />
+                          {element.output}
                         </p>
                       </div>
                     ))}

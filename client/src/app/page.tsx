@@ -20,6 +20,7 @@ export default function Component() {
         <div className="flex-1 bg-background text-foreground px-4 md:px-10">
           <div className="container mx-auto grid grid-cols-1 lg:grid-cols-[900px_1fr] gap-8 py-8">
             <Quetions />
+            hhhhhhhhhhhhh
             <div>
               <Catagories />
             </div>

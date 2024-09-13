@@ -33,7 +33,7 @@ const OutputWindow = ({
             "text-green-600": parsedMessage2.success,
           })}
         >
-          {cleanStatus}
+          {cleanStatus}ss
         </div>
       ) : (
         "Press run button to get output."

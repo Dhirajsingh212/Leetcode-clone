@@ -77,7 +77,7 @@ export function EditorComp({
             <SelectContent>
               <SelectItem value="javascript">Javascript</SelectItem>
               <SelectItem value="python">Python</SelectItem>
-              {/* <SelectItem value="cpp">C++</SelectItem> */}
+              <SelectItem value="cpp">C++</SelectItem>
               <SelectItem value="java">Java</SelectItem>
             </SelectContent>
           </Select>

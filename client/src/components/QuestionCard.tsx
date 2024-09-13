@@ -25,7 +25,7 @@ const QuestionCard = ({
   constraints,
 }: Problem) => {
   return (
-    <Card className="bg-card-foreground text-card-foreground py-4 dark:bg-slate-800 dark:text-white">
+    <Card className="bg-violet-500 text-card-foreground py-4 dark:bg-slate-800 dark:text-white">
       <CardContent>
         <div className="flex items-center justify-between my-2">
           <div className="bg-primary px-2 py-1 rounded-md text-xs font-medium text-primary-foreground">
@@ -34,9 +34,7 @@ const QuestionCard = ({
           <StarIcon className="w-4 h-4 text-yellow-500" />
         </div>
         <h3 className="text-lg font-bold mb-2 text-white">{title}</h3>
-        <p className="text-sm text-muted-foreground line-clamp-3">
-          {description}
-        </p>
+        <p className="text-sm text-white line-clamp-3">{description}</p>
       </CardContent>
       <CardFooter>
         <Link

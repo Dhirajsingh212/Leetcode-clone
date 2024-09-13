@@ -1,14 +1,12 @@
+import axios from "axios";
 import dotenv from "dotenv";
-import { handleCode, handleJavaCode } from "./utils/code";
 import { redisClient } from "./utils/redis";
-import { cleanProblemData } from "./utils/functions";
 
 interface ProblemData {
   problemId: string;
   userId: string;
-  code: string;
-  language: string;
-  testcase: any;
+  token: string;
+  count: number;
 }
 
 interface CodeResponse {
@@ -32,36 +30,46 @@ async function main() {
         : null;
 
       if (parsedResponseData) {
-        const { problemId, userId, code, language, testcase } =
-          parsedResponseData;
+        const { problemId, userId, token, count } = parsedResponseData;
 
         console.log(`Code submitted by ${userId}`);
 
-        const cleanedTestCase = cleanProblemData(testcase);
-        let codeResponse: CodeResponse;
+        const url = `${process.env.JUDGE0_URL}/${token}` || "";
 
-        if (language === "java") {
-          codeResponse = await handleJavaCode(code, cleanedTestCase);
+        const response = await axios.get(url, {
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${process.env.JUDGE0_API_KEY}`,
+          },
+        });
+
+        if (count < 5 && response.data.status.description === "Processing") {
+          redisClient.lpush(
+            "problems",
+            JSON.stringify({
+              ...parsedResponseData,
+              count: count + 1,
+            })
+          );
         } else {
-          codeResponse = await handleCode(code, language, cleanedTestCase);
+          console.log(response.data);
+          await redisClient.publish(
+            "problem_done",
+            JSON.stringify({
+              problemId: problemId,
+              status: response.data.status.description,
+              success: response.data.status.description === "Accepted" || false,
+              error: response.data.status.description === "Accepted" || true,
+              userId: userId,
+              compile_output: response.data.compile_output,
+            })
+          );
         }
-
-        const status = codeResponse?.output || "Test cases failed";
-
-        await redisClient.publish(
-          "problem_done",
-          JSON.stringify({
-            problemId: problemId,
-            status: status,
-            success: codeResponse.success,
-            error: codeResponse.error || null,
-            userId: userId,
-          })
-        );
       }
     } catch (err) {
       console.error("An error occurred:", err);
     }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 }
 

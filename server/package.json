@@ -19,6 +19,7 @@
     "@types/morgan": "^1.9.9",
     "@types/nodemon": "^1.19.6",
     "@types/ws": "^8.5.12",
+    "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",

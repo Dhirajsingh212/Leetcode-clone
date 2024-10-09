@@ -26,3 +26,41 @@ Overall, this platform is built to mirror the functionalities of LeetCode, provi
 
 https://github.com/user-attachments/assets/a15aca79-901a-4028-a39d-c5ba26278e57
 
+## Project setup
+### Using docker
+1.navigate to server
+```
+cd server
+copy .env.example .env
+```
+env file
+
+```
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/mydb3"
+SECRET="secret"
+END="30d"
+NODE_ENV="development"
+PORT=8000
+ORIGIN="http://localhost:3000"
+JUDGE0_API_KEY=""
+JUDGE0_URL=""
+```
+add judge0 api key and judge0 url
+
+2.navigate to worker
+```
+cd worker
+copy .env.example .env
+```
+env file
+```
+JUDGE0_API_KEY=""
+JUDGE0_URL=""
+```
+add judge0 api key and judge0 url
+3.docker command
+```
+docker-compose up --build
+```
+
+

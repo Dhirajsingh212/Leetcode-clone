@@ -28,7 +28,7 @@ https://github.com/user-attachments/assets/a15aca79-901a-4028-a39d-c5ba26278e57
 
 ## Project setup
 ### Using docker
-1.navigate to server
+### 1.navigate to server
 ```
 cd server
 copy .env.example .env
@@ -47,7 +47,7 @@ JUDGE0_URL=""
 ```
 add judge0 api key and judge0 url
 
-2.navigate to worker
+### 2.navigate to worker
 ```
 cd worker
 copy .env.example .env
@@ -58,7 +58,8 @@ JUDGE0_API_KEY=""
 JUDGE0_URL=""
 ```
 add judge0 api key and judge0 url
-3.docker command
+
+### 3.docker command
 ```
 docker-compose up --build
 ```

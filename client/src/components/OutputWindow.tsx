@@ -25,9 +25,10 @@ const OutputWindow = ({
       className={cn(
         "overflow-scroll no-scrollbar bg-gray-200 dark:bg-slate-800 h-full w-full rounded-lg dark:text-white p-4 whitespace-pre-wrap",
         {
-          "bg-red-500 text-white text-center font-xl font-bold":
+          "bg-red-500 dark:bg-red-500 text-white dark:text-white text-center font-xl font-bold":
             parsedMessage2.error,
-          "bg-green-600 text-white": parsedMessage2.success,
+          "bg-green-600 dark:bg-green-600 text-white dark:text-white":
+            parsedMessage2.success,
         }
       )}
     >

@@ -1,3 +1,4 @@
+import cluster from "cluster";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -14,96 +15,113 @@ const redisClient = createClient({
   url: process.env.REDIS_URL || "",
 });
 
-const app = express();
-
 dotenv.config();
+const numCPUs = require("os").cpus().length;
 
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-  })
-);
-app.use(cookieParser());
-app.use(express.json());
-app.use(morgan("dev"));
+if (cluster.isPrimary) {
+  console.log(`Primary ${process.pid} is running`);
 
-app.get("/", (req, res) => {
-  res.send("Work fine");
-});
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
 
-app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/code", codeRoutes);
+  cluster.on("exit", (worker) => {
+    console.log(`Worker ${worker.process.pid} died`);
+  });
+} else {
+  const app = express();
 
-const server = http.createServer(app);
-const wss = new WebSocketServer({ noServer: true });
+  app.use(
+    cors({
+      origin: "http://localhost:3000",
+      credentials: true,
+    })
+  );
+  app.use(cookieParser());
+  app.use(express.json());
+  app.use(morgan("dev"));
 
-interface Client {
-  ws: any;
-  id: number;
-}
+  app.get("/", (req, res) => {
+    res.send("Work fine");
+  });
 
-let clientsMap = new Map<number, Client>();
+  app.use("/api/v1/auth", authRoutes);
+  app.use("/api/v1/code", codeRoutes);
 
-function addClient(client: Client) {
-  clientsMap.set(client.id, client);
-}
+  const server = http.createServer(app);
+  const wss = new WebSocketServer({ noServer: true });
 
-wss.on(
-  "connection",
-  function connection(ws: WebSocket, request: IncomingMessage) {
-    ws.on("error", console.error);
+  interface Client {
+    ws: any;
+    id: number;
+  }
 
-    const token = (request.headers as any).cookie;
-    const regex = /access_token=([^;]+)/;
+  let clientsMap = new Map<number, Client>();
 
-    const match = token.match(regex);
-    const accessToken = match ? match[1] : null;
+  function addClient(client: Client) {
+    clientsMap.set(client.id, client);
+  }
 
-    if (!accessToken) {
-      ws.close();
-    }
+  wss.on(
+    "connection",
+    function connection(ws: WebSocket, request: IncomingMessage) {
+      ws.on("error", console.error);
 
-    try {
-      const decoded = verifyToken(accessToken);
-      addClient({ ws, id: (decoded as any).id });
+      const token = (request.headers as any).cookie;
+      const regex = /access_token=([^;]+)/;
 
-      redisClient.subscribe("problem_done", (message: any) => {
-        clientsMap.forEach((client) => {
-          const parsedMessage = JSON.parse(message || "");
-          if (
-            Number(parsedMessage.userId) === Number(client.id) &&
-            client.ws.readyState === WebSocket.OPEN
-          ) {
-            client.ws.send(JSON.stringify({ message }));
-          }
+      const match = token.match(regex);
+      const accessToken = match ? match[1] : null;
+
+      if (!accessToken) {
+        ws.close();
+        return;
+      }
+
+      try {
+        const decoded = verifyToken(accessToken);
+        addClient({ ws, id: (decoded as any).id });
+
+        redisClient.subscribe("problem_done", (message: any) => {
+          clientsMap.forEach((client) => {
+            const parsedMessage = JSON.parse(message || "");
+            if (
+              Number(parsedMessage.userId) === Number(client.id) &&
+              client.ws.readyState === WebSocket.OPEN
+            ) {
+              client.ws.send(JSON.stringify({ message }));
+            }
+          });
         });
+      } catch (err) {
+        console.log(err);
+      }
+
+      ws.send("connected through websocket");
+    }
+  );
+
+  server.on(
+    "upgrade",
+    (request: IncomingMessage, socket: any, head: Buffer) => {
+      wss.handleUpgrade(request, socket, head, (ws: WebSocket) => {
+        wss.emit("connection", ws, request);
+      });
+    }
+  );
+
+  async function startServer() {
+    try {
+      await redisClient.connect();
+      console.log(`Worker ${process.pid} connected to Redis.`);
+
+      server.listen(8000, function () {
+        console.log(`Worker ${process.pid} listening on 8000`);
       });
     } catch (err) {
-      console.log(err);
+      console.log("Failed to start server", err);
     }
-
-    ws.send("connected through websocket");
   }
-);
 
-server.on("upgrade", (request: IncomingMessage, socket: any, head: Buffer) => {
-  wss.handleUpgrade(request, socket, head, (ws: WebSocket) => {
-    wss.emit("connection", ws, request);
-  });
-});
-
-async function startServer() {
-  try {
-    redisClient.connect();
-    console.log("redis connected.");
-
-    server.listen(8000, function () {
-      console.log(`Listening on 8000`);
-    });
-  } catch (err) {
-    console.log("Failed to start server");
-  }
+  startServer();
 }
-
-startServer();
